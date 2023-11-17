@@ -7,7 +7,7 @@ import com.openapi3demo.bookapiservice.model.amphi.Assignment;
 
 import java.util.List;
 
-public interface BookService {
+public interface AmphiService {
 
     Book createNew(BookRequestDTO bookRequestDTO);
 
