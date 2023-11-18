@@ -2,6 +2,14 @@ package com.openapi3demo.bookapiservice.model.evam;
 
 import java.util.Date;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+@Document(value = "operations")
 public class Operation {
         public String operationID;
         public String name;

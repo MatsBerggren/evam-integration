@@ -1,11 +1,10 @@
 package com.openapi3demo.bookapiservice.service;
 
+import java.util.List;
+
 import com.openapi3demo.bookapiservice.dto.BookRequestDTO;
 import com.openapi3demo.bookapiservice.dto.BookUpdateRequestDTO;
 import com.openapi3demo.bookapiservice.model.Book;
-import com.openapi3demo.bookapiservice.model.amphi.Assignment;
-
-import java.util.List;
 
 public interface BookService {
 

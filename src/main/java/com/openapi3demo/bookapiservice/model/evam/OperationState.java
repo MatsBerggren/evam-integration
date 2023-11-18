@@ -1,6 +1,6 @@
 package com.openapi3demo.bookapiservice.model.evam; 
 
-enum OperationState {
+public enum OperationState {
     ACTIVE,
     AVAILABLE,
     COMPLETE;

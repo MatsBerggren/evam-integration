@@ -1,17 +1,17 @@
 package com.openapi3demo.bookapiservice.service.impl;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.openapi3demo.bookapiservice.dto.BookRequestDTO;
 import com.openapi3demo.bookapiservice.dto.BookUpdateRequestDTO;
 import com.openapi3demo.bookapiservice.model.Book;
 import com.openapi3demo.bookapiservice.repository.BookRepository;
 import com.openapi3demo.bookapiservice.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -67,7 +67,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public Book getById(String bookId) {
         return bookRepository.findById(bookId).orElseThrow(
-                () -> new RuntimeException(String.format("No Book found for id: %s", bookId))
+                () -> new RuntimeException("No Book found for id: %s".formatted(bookId))
         );
     }
 }
