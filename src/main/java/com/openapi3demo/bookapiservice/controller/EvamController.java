@@ -1,6 +1,7 @@
 package com.openapi3demo.bookapiservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import com.openapi3demo.bookapiservice.service.EvamService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 @Tag(name = "Evam API", description = "API collection for CRUD operations on Book Resource")
 public class EvamController {
