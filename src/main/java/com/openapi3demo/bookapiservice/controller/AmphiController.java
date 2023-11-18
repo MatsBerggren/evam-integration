@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 import com.openapi3demo.bookapiservice.model.amphi.Assignment;
-import com.openapi3demo.bookapiservice.model.amphi.CloseReason;
 import com.openapi3demo.bookapiservice.model.evam.Operation;
 import com.openapi3demo.bookapiservice.model.evam.OperationState;
 import com.openapi3demo.bookapiservice.service.AmphiService;
