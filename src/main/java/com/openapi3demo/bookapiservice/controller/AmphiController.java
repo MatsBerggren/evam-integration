@@ -1,5 +1,6 @@
 package com.openapi3demo.bookapiservice.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -10,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 import com.openapi3demo.bookapiservice.model.amphi.Assignment;
+import com.openapi3demo.bookapiservice.model.amphi.MethaneReport;
+import com.openapi3demo.bookapiservice.model.amphi.Property;
+import com.openapi3demo.bookapiservice.model.amphi.RekReport;
+import com.openapi3demo.bookapiservice.model.amphi.ToPosition;
 import com.openapi3demo.bookapiservice.model.evam.Operation;
 import com.openapi3demo.bookapiservice.model.evam.OperationState;
 import com.openapi3demo.bookapiservice.service.AmphiService;
@@ -57,26 +62,45 @@ public class AmphiController {
         assignment.is_closed = Boolean.toString(operation.vehicleStatus.isStartStatus);
         assignment.close_reason = null;
         assignment.is_selected = operation.operationState == OperationState.ACTIVE? "true" : "false";
-        assignment.distance = "0";
-        assignment.eta = new Date();
         assignment.is_destination_alarm_sent = "false";
+        assignment.selected_destination = operation.destinationSiteLocation.;
+        assignment.eta = new Date();
         assignment.is_head_unit = "false";
         assignment.is_routed = "false";
-        assignment.methane_report = null;
+        assignment.distance = "0";
+        assignment.methane_report = getMethaneReport(operation);
+        assignment.rek_report = getRekReport(operation);
         assignment.position = null;
-        assignment.properties = null;
-        assignment.rek_report = null;
-        assignment.selected_destination = "SÖS";
+        assignment.to_position = getToPosition(operation);
+        assignment.properties = getProperties(operation);
         assignment.state = null;
-        assignment.state_configuration = null;
         assignment.state_entries = null;
-        assignment.to_position = null;
-        
+        assignment.state_configuration = null;
 
         Gson gson = new Gson();
         String json = gson.toJson(assignment);
 
         return json;
+    }
+
+    private RekReport getRekReport(Operation operation) {
+        return null;
+    }
+
+    private MethaneReport getMethaneReport(Operation operation) {
+        return null;
+    }
+
+    private ArrayList<Property> getProperties(Operation operation) {
+        return null;
+    }
+
+    private ToPosition getToPosition(Operation operation) {
+        ToPosition to_position = new ToPosition();
+        to_position.wgs84_dd_la = operation.destinationSiteLocation.latitude;
+        to_position.wgs84_dd_lo = operation.destinationSiteLocation.longitude;
+
+        return to_position;
     }
 
 }
