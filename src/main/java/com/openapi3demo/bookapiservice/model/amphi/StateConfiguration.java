@@ -1,10 +1,15 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
 import java.util.ArrayList;
 
-public class StateConfiguration{
-    public ArrayList<Integer> allowed_transitions;
-    public int id;
-    public String name;
-    public String transition_name;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class StateConfiguration {
+    private ArrayList<Integer> allowed_transitions;
+    private Integer id;
+    private String name;
+    private String transition_name;
 }

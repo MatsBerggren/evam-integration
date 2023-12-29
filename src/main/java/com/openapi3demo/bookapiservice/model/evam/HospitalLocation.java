@@ -1,12 +1,17 @@
 package com.openapi3demo.bookapiservice.model.evam;
 
-class HospitalLocation {
-        public Number id;
-        public Number latitude;
-        public Number longitude;
-        public String name;
-        public String street1;
-        public String city;
-        public String region;
-        public String postalCode;
-    }
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class HospitalLocation {
+    private Integer id;
+    private Double latitude;
+    private Double longitude;
+    private String name;
+    private String street1;
+    private String city;
+    private String region;
+    private String postalCode;
+}

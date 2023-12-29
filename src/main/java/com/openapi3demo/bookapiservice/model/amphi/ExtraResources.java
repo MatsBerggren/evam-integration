@@ -1,19 +1,21 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
-import com.fasterxml.jackson.annotation.JsonProperty; 
+import lombok.Builder;
+import lombok.Data;
 
-public class ExtraResources{
-    public int ambulances;
-    public int chemical_suit;
-    public int commander_unit;
-    public int doctor_on_duty;
-    public int emergency_wagon;
-    public int helicopter;
-    public int medical_team;
-    public int medical_transport;
-    @JsonProperty("PAM") 
-    public int pAM;
-    public int sanitation_wagon;
-    public int transport_ambulance;
-    public int units_total;
+@Data
+@Builder
+public class ExtraResources {
+    public Integer ambulances;
+    public Integer chemical_suit;
+    public Integer commander_unit;
+    public Integer doctor_on_duty;
+    public Integer emergency_wagon;
+    public Integer helicopter;
+    public Integer medical_team;
+    public Integer medical_transport;
+    public Integer PAM;
+    public Integer sanitation_wagon;
+    public Integer transport_ambulance;
+    public Integer units_total;
 }

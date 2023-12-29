@@ -6,8 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.openapi3demo.bookapiservice.model.evam.Operation;
 
 @Repository
-public interface EvamRepository extends MongoRepository<Operation, String> {
-
-    Operation findByOperationID(String operationID);
-
+public interface EvamOperationRepository extends MongoRepository<Operation, String> {
 }

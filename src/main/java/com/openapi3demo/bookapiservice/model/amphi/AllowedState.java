@@ -1,7 +1,12 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
-public class AllowedState{
-    public String action_name;
-    public int state_id;
-    public String state_name;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class AllowedState {
+    private String action_name;
+    private Integer state_id;
+    private String state_name;
 }

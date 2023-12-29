@@ -30,5 +30,5 @@ public class Battery {
         public BatteryHealth health;
         public BatteryPlugged plugged;
         public BatteryStatus status;
-        public Number capacity;
+        public Integer capacity;
 }

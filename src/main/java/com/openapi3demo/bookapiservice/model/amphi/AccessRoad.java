@@ -1,6 +1,11 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
-public class AccessRoad{
-    public String comment;
-    public boolean is_obstructed;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class AccessRoad {
+    private String comment;
+    private boolean is_obstructed;
 }

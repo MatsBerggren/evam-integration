@@ -1,10 +1,19 @@
 package com.openapi3demo.bookapiservice.model.evam;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.Id;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
 public class VehicleState {
-        public Date timestamp;
-        public VehicleStatus vehicleStatus;
-        public String activeCaseFullId;
-        public Location vehicleLocation;
-    }
+    @Id
+    private String id;
+    public LocalDateTime timestamp;
+    public VehicleStatus vehicleStatus;
+    public String activeCaseFullId;
+    public Location vehicleLocation;
+}

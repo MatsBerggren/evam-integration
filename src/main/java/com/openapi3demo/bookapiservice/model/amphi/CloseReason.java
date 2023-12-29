@@ -1,9 +1,11 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class CloseReason{
-    public String comment;
-    public String reason;
+@Builder
+public class CloseReason {
+    private String comment;
+    private String reason;
 }

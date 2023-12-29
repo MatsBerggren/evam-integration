@@ -1,6 +1,11 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
-public class Property{
-    public String name;
-    public String value;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class Property {
+    private String name;
+    private String value;
 }

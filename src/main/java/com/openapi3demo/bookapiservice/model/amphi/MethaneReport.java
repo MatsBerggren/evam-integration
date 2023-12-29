@@ -1,22 +1,26 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-public class MethaneReport{
-    public AccessRoad access_road;
-    public Date created;
-    public String exact_location;
-    public ExtraResources extra_resources;
-    public ArrayList<String> hazards;
-    public InventoryLevel inventory_level;
-    public Date last_updated;
-    public boolean major_incident;
-    public int numbers_affected_green;
-    public int numbers_affected_red;
-    public int numbers_affected_yellow;
-    public Position position ;
-    public String special_injuries;
-    public Date time_first_departure;
-    public ArrayList<String> types ;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class MethaneReport {
+    private AccessRoad access_road;
+    private String created;
+    private String exact_location;
+    private ExtraResources extra_resources;
+    private ArrayList<String> hazards;
+    private InventoryLevel inventory_level;
+    private String last_updated;
+    private Boolean major_incident;
+    private Integer numbers_affected_green;
+    private Integer numbers_affected_red;
+    private Integer numbers_affected_yellow;
+    private Position position;
+    private String special_injuries;
+    private String time_first_departure;
+    private ArrayList<String> types;
 }

@@ -1,10 +1,15 @@
 package com.openapi3demo.bookapiservice.model.amphi;
 
-import java.util.Date;
+import lombok.Builder;
+import lombok.Data;
+import nonapi.io.github.classgraph.json.Id;
 
-public class StateEntry{
-    public int distance;
-    public int from_id;
-    public Date time;
-    public int to_id;
+@Data
+@Builder
+public class StateEntry {
+    private Integer distance;
+    @Id
+    private Integer from_id;
+    private String time;
+    private Integer to_id;
 }

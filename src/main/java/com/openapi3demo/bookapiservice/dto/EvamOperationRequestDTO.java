@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class EvamOperationRequestDTO {
-
-    private String json;
+    private String operation;
     private String operationid;
-
 }

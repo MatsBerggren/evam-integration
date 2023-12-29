@@ -1,12 +1,17 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
-public class IncidentOrganization{
-    public String assembly_point_injured;
-    public String assembly_point_uninjured;
-    public String assembly_site;
-    public String breakpoint;
-    public String collect_point;
-    public String command_site;
-    public String incident_site;
-    public String landing_site;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class IncidentOrganization {
+    private String assembly_point_injured;
+    private String assembly_point_uninjured;
+    private String assembly_site;
+    private String breakpoint;
+    private String collect_point;
+    private String command_site;
+    private String incident_site;
+    private String landing_site;
 }

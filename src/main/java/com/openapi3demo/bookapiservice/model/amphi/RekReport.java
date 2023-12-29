@@ -1,14 +1,17 @@
 package com.openapi3demo.bookapiservice.model.amphi;
 
-import java.util.Date;
+import lombok.Builder;
+import lombok.Data;
 
-public class RekReport{
-    public String affected_count;
-    public CommandOrganization command_organization;
-    public String comments;
-    public Date created;
-    public IncidentOrganization incident_organization;
-    public Date last_updated;
-    public Position position ;
-    public String resources_on_site;
+@Data
+@Builder
+public class RekReport {
+    private String affected_count;
+    private CommandOrganization command_organization;
+    private String comments;
+    private String created;
+    private IncidentOrganization incident_organization;
+    private String last_updated;
+    private Position position;
+    private String resources_on_site;
 }

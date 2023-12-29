@@ -1,10 +1,15 @@
-package com.openapi3demo.bookapiservice.model.amphi; 
+package com.openapi3demo.bookapiservice.model.amphi;
 
 import java.util.ArrayList;
 
-public class State{
-    public String action_name;
-    public ArrayList<AllowedState> allowed_states;
-    public int state_id;
-    public String state_name;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class State {
+    private String action_name;
+    private ArrayList<AllowedState> allowed_states;
+    private Integer state_id;
+    private String state_name;
 }
