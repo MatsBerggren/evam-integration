@@ -22,7 +22,7 @@ public class EvamRakelStateServiceImpl implements EvamRakelStateService {
         RakelState rakelState = new Gson().fromJson(evamRakelStateRequestDTO.getRakelState(), RakelState.class);
         
         Optional<RakelState> existingRakelState = evamRakelStateRepository.findById("1");
-        if(!existingRakelState.isPresent()) {
+        if(existingRakelState.isEmpty()) {
             rakelState.setId("1");
             rakelState.setUnitId("1");
             return evamRakelStateRepository.save(rakelState);

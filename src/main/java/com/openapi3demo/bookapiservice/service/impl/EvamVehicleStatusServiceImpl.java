@@ -1,12 +1,5 @@
 package com.openapi3demo.bookapiservice.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.openapi3demo.bookapiservice.classes.LocalDateTimeDeserializer;
@@ -14,43 +7,58 @@ import com.openapi3demo.bookapiservice.dto.EvamVehicleStatusRequestDTO;
 import com.openapi3demo.bookapiservice.model.evam.VehicleStatus;
 import com.openapi3demo.bookapiservice.repository.EvamVehicleStatusRepository;
 import com.openapi3demo.bookapiservice.service.EvamVehicleStatusService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EvamVehicleStatusServiceImpl implements EvamVehicleStatusService {
 
-    @Autowired
-    EvamVehicleStatusRepository evamVehicleStatusRepository;
+    private final EvamVehicleStatusRepository evamVehicleStatusRepository;
+    private final Gson gson;
+
+    public EvamVehicleStatusServiceImpl(EvamVehicleStatusRepository evamVehicleStatusRepository) {
+        this.evamVehicleStatusRepository = evamVehicleStatusRepository;
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer())
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+    }
 
     @Override
     public VehicleStatus[] updateVehicleStatus(EvamVehicleStatusRequestDTO evamVehicleStatusRequestDTO) {
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer());
-        Gson gson = gsonBuilder.setPrettyPrinting().disableHtmlEscaping().create();
-
         VehicleStatus[] vehicleStatuses = gson.fromJson(evamVehicleStatusRequestDTO.getVehicleStatus(),
                 VehicleStatus[].class);
 
-        Integer index = 0;
-        for (VehicleStatus vehicleStatus : vehicleStatuses) {
-            Integer finalIndex = index+1;
-            Optional<VehicleStatus> existingVehicleStatus = evamVehicleStatusRepository.findById(finalIndex.toString());
+        for (int i = 0; i < vehicleStatuses.length; i++) {
+            VehicleStatus vehicleStatus = vehicleStatuses[i];
+            String id = String.valueOf(i + 1);
 
-            if (!existingVehicleStatus.isPresent()) {
-                vehicleStatus.setId(finalIndex.toString());
-                evamVehicleStatusRepository.save(vehicleStatus);
+            Optional<VehicleStatus> existingVehicleStatus = evamVehicleStatusRepository.findById(id);
+
+            VehicleStatus statusToUpdate;
+
+            if (existingVehicleStatus.isPresent()) {
+                statusToUpdate = existingVehicleStatus.get();
+                statusToUpdate.setCategoryName(vehicleStatus.getCategoryName());
+                statusToUpdate.setCategoryType(vehicleStatus.getCategoryType());
+                statusToUpdate.setEvent(vehicleStatus.getEvent());
+                statusToUpdate.setIsEndStatus(vehicleStatus.getIsEndStatus());
+                statusToUpdate.setIsStartStatus(vehicleStatus.getIsStartStatus());
+                statusToUpdate.setName(vehicleStatus.getName());
+                statusToUpdate.setSuccessorName(vehicleStatus.getSuccessorName());
             } else {
-                existingVehicleStatus.get().setCategoryName(vehicleStatus.getCategoryName());
-                existingVehicleStatus.get().setCategoryType(vehicleStatus.getCategoryType());
-                existingVehicleStatus.get().setEvent(vehicleStatus.getEvent());
-                existingVehicleStatus.get().setIsEndStatus(vehicleStatus.getIsEndStatus());
-                existingVehicleStatus.get().setIsStartStatus(vehicleStatus.getIsStartStatus());
-                existingVehicleStatus.get().setName(vehicleStatus.getName());
-                existingVehicleStatus.get().setSuccessorName(vehicleStatus.getSuccessorName());
-                evamVehicleStatusRepository.save(existingVehicleStatus.get());
+                vehicleStatus.setId(id);
+                statusToUpdate = vehicleStatus;
             }
-            index++;
+
+            evamVehicleStatusRepository.save(statusToUpdate);
         }
+
         return vehicleStatuses;
     }
 
@@ -69,5 +77,4 @@ public class EvamVehicleStatusServiceImpl implements EvamVehicleStatusService {
     public VehicleStatus getByName(String name) {
         return evamVehicleStatusRepository.findByName(name);
     }
-
 }

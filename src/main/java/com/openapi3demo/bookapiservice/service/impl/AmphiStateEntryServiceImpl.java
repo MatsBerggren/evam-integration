@@ -21,7 +21,7 @@ public class AmphiStateEntryServiceImpl implements AmphiStateEntryService {
         Optional<StateEntry> existingStateEntry = amphiStateEntryRepository
                 .findById(stateEntry.getFrom_id().toString());
 
-        if (!existingStateEntry.isPresent()) {
+        if (existingStateEntry.isEmpty()) {
             return amphiStateEntryRepository.save(stateEntry);
         } else {
             existingStateEntry.get().setDistance(stateEntry.getDistance());

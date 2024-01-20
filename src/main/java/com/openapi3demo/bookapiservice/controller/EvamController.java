@@ -13,13 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.openapi3demo.bookapiservice.dto.EvamOperationRequestDTO;
 import com.openapi3demo.bookapiservice.dto.EvamRakelStateRequestDTO;
 import com.openapi3demo.bookapiservice.dto.EvamTripLocationHistoryRequestDTO;
+import com.openapi3demo.bookapiservice.dto.EvamMethaneReportRequestDTO;
 import com.openapi3demo.bookapiservice.dto.EvamVehicleStateRequestDTO;
 import com.openapi3demo.bookapiservice.dto.EvamVehicleStatusRequestDTO;
+import com.openapi3demo.bookapiservice.model.amphi.MethaneReport;
 import com.openapi3demo.bookapiservice.model.evam.Operation;
 import com.openapi3demo.bookapiservice.model.evam.RakelState;
 import com.openapi3demo.bookapiservice.model.evam.TripLocationHistory;
 import com.openapi3demo.bookapiservice.model.evam.VehicleState;
 import com.openapi3demo.bookapiservice.model.evam.VehicleStatus;
+import com.openapi3demo.bookapiservice.service.EvamMethaneReportService;
 import com.openapi3demo.bookapiservice.service.EvamOperationService;
 import com.openapi3demo.bookapiservice.service.EvamRakelStateService;
 import com.openapi3demo.bookapiservice.service.EvamTripLocationHistoryService;
@@ -44,6 +47,8 @@ public class EvamController {
     EvamRakelStateService evamRakelStateService;
     @Autowired
     EvamTripLocationHistoryService evamTripLocationHistoryService;
+    @Autowired
+    EvamMethaneReportService evamMethaneReportService;
 
     @GetMapping
     public Operation getById(@RequestParam String operationId) {
@@ -74,5 +79,11 @@ public class EvamController {
     public TripLocationHistory createNew(
             @RequestBody EvamTripLocationHistoryRequestDTO evamTripLocationHistoryRequestDTO) {
         return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
+    }
+
+    @PostMapping(value = "/methanereport", produces = "application/json")
+    public MethaneReport createNew(
+            @RequestBody EvamMethaneReportRequestDTO evamMethaneReportRequestDTO) {
+        return evamMethaneReportService.updateMethaneReport(evamMethaneReportRequestDTO);
     }
 }

@@ -1,7 +1,5 @@
 package com.openapi3demo.bookapiservice.model.amphi;
 
-import java.util.ArrayList;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,7 +7,7 @@ import lombok.Data;
 @Builder
 public class State {
     private String action_name;
-    private ArrayList<AllowedState> allowed_states;
+    private AllowedState[] allowed_states;
     private Integer state_id;
     private String state_name;
 }

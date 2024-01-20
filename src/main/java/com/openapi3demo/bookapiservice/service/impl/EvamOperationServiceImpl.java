@@ -36,7 +36,7 @@ public class EvamOperationServiceImpl implements EvamOperationService {
         Operation operation = gson.fromJson(evamOperationRequestDTO.getOperation(), Operation.class);
         Optional<Operation> existingOperation = evamOperationRepository.findById("1");
 
-        String oldOperation = existingOperation.get().getOperationID();        
+        String oldOperation = existingOperation.map(Operation::getOperationID).orElse("");
         String newOperation = operation.getOperationID();
         
         if (!oldOperation.equals(newOperation)) {
@@ -44,13 +44,12 @@ public class EvamOperationServiceImpl implements EvamOperationService {
             evamVehicleStateRepository.deleteAll();
         }
 
-        if (!existingOperation.isPresent()) {
+        if (existingOperation.isEmpty()) {
             operation.setId("1");
             return evamOperationRepository.save(operation);
         } else {
             existingOperation.get().setOperationID(operation.getOperationID());
-            existingOperation.get()
-                    .setAdditionalCoordinationInformation(operation.getAdditionalCoordinationInformation());
+            existingOperation.get().setAdditionalCoordinationInformation(operation.getAdditionalCoordinationInformation());
             existingOperation.get().setAdditionalInfo(operation.getAdditionalInfo());
             existingOperation.get().setAlarmCategory(operation.getAlarmCategory());
             existingOperation.get().setAlarmEventCode(operation.getAlarmEventCode());
@@ -80,9 +79,7 @@ public class EvamOperationServiceImpl implements EvamOperationService {
             existingOperation.get().setPatientUID(operation.getPatientUID());
             existingOperation.get().setRadioGroupMain(operation.getRadioGroupMain());
             existingOperation.get().setRadioGroupSecondary(operation.getRadioGroupSecondary());
-            // existingOperation.get().setSelectedHospital(1());
             existingOperation.get().setSelectedHospital(operation.getSelectedHospital());
-            // existingOperation.get().setSelectedPriority(1());
             existingOperation.get().setSelectedPriority(operation.getSelectedPriority());
             existingOperation.get().setSendTime(operation.getSendTime());
             existingOperation.get().setTransmitterCode(operation.getTransmitterCode());

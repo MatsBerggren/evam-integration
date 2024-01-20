@@ -1,7 +1,5 @@
 package com.openapi3demo.bookapiservice.model.amphi;
 
-import java.util.ArrayList;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +10,5 @@ public class Destination {
     private String name;
     private Position position;
     private String type;
-    private ArrayList<Ward> wards;
+    private Ward[] wards;
 }

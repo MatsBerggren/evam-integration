@@ -32,7 +32,7 @@ public class EvamTripHistoryLocationServiceImpl implements EvamTripLocationHisto
 
         Optional<TripLocationHistory> existingTripLocationHistory = evamTripLocationHistoryRepository.findById("1");
 
-        if (!existingTripLocationHistory.isPresent()) {
+        if (existingTripLocationHistory.isEmpty()) {
             tripLocationHistory.setId("1");
             evamTripLocationHistoryRepository.save(tripLocationHistory);
         } else {

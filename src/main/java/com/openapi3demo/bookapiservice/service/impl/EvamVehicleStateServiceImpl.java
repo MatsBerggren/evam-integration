@@ -46,7 +46,7 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
         Integer previousstate;
         Optional<StateEntry> stateEntries = amphiStateEntryRepository.findAll(Sort.by(Sort.Direction.DESC, "time"))
                 .stream().findFirst();
-        if (!stateEntries.isPresent()) {
+        if (stateEntries.isEmpty()) {
             previousstate = 0;
         } else {
             previousstate = stateEntries.get().getTo_id();
@@ -54,7 +54,7 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
 
         Optional<VehicleState> existingVehicleState = evamVehicleStateRepository
                 .findById("1");
-        if (!existingVehicleState.isPresent()) {
+        if (existingVehicleState.isEmpty()) {
             vehicleState.setId("1");
 
             if (!previousstate.equals(Integer.parseInt(
