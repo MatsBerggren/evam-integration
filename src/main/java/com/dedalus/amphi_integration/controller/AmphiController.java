@@ -131,7 +131,7 @@ public class AmphiController {
             Gson gson = new Gson();
             Destination[] destinations = gson.fromJson(json, Destination[].class);
             
-            Arrays.stream(destinations).forEach(amphiDestinationService::updateDestination);
+            Arrays.stream(destinations).distinct().forEach(amphiDestinationService::updateDestination);
             
             return gson.toJson(destinations);
         }
@@ -165,7 +165,7 @@ public class AmphiController {
                     .received("2023-10-25T14:31:00Z")
                     .accepted("2023-10-25T14:32:00Z")
                     .rowid("0faaa8e0-956b-444b-baea-ddf6e806bc8d")
-                    .is_closed(Boolean.toString(operation.operationState != OperationState.ACTIVE))
+                    .is_closed(Boolean.toString(operation.operationState == OperationState.COMPLETE))
                     .is_selected(operation.operationState == OperationState.ACTIVE ? "1" : "0")
                     .is_destination_alarm_sent("false")
                     .selected_destination(operation.getSelectedHospital().toString())

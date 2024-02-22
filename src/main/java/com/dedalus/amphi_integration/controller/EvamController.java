@@ -57,6 +57,7 @@ public class EvamController {
 
     @PostMapping(value = "/operations", produces = "application/json")
     public Operation createNew(@RequestBody EvamOperationRequestDTO evamOperationRequestDTO) {
+        System.out.println(evamOperationRequestDTO);
         return evamOperationService.updateOperation(evamOperationRequestDTO);
     }
 

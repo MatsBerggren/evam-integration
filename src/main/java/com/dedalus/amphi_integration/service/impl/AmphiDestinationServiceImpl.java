@@ -15,8 +15,8 @@ public class AmphiDestinationServiceImpl implements AmphiDestinationService {
 
     @Override
     public Destination updateDestination(Destination destination) {
-        Destination existingDestination = amphiDestinationRepository.findByNameAndType(destination.getName(),
-                destination.getType());
+        System.out.println(destination);
+        Destination existingDestination = amphiDestinationRepository.findByNameAndType(destination.getName(), destination.getType());
         if (existingDestination == null) {
             return amphiDestinationRepository.save(destination);
         } else {
