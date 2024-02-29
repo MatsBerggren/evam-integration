@@ -14,19 +14,13 @@ public class AmphiDestinationServiceImpl implements AmphiDestinationService {
     AmphiDestinationRepository amphiDestinationRepository;
 
     @Override
-    public Destination updateDestination(Destination destination) {
-        System.out.println(destination);
-        Destination existingDestination = amphiDestinationRepository.findByNameAndType(destination.getName(), destination.getType());
-        if (existingDestination == null) {
-            return amphiDestinationRepository.save(destination);
-        } else {
-            existingDestination.setName(destination.getName());
-            existingDestination.setType(destination.getType());
-            existingDestination.setAbbreviation(destination.getAbbreviation());
-            existingDestination.setPosition(destination.getPosition());
-            existingDestination.setWards(destination.getWards());
-            return amphiDestinationRepository.save(existingDestination);
-        }
+    public Destination[] updateDestinations(Destination[] destinations) {
+        System.out.println(destinations);
+        amphiDestinationRepository.deleteAll();
+        for (Destination destination : destinations) {
+            amphiDestinationRepository.save(destination);
+        } 
+        return destinations;
     }
 
     @Override

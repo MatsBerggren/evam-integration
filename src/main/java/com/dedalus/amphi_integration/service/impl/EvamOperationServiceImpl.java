@@ -1,102 +1,89 @@
 package com.dedalus.amphi_integration.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamOperationRequestDTO;
 import com.dedalus.amphi_integration.model.evam.Operation;
-import com.dedalus.amphi_integration.repository.AmphiStateEntryRepository;
-import com.dedalus.amphi_integration.repository.EvamOperationRepository;
-import com.dedalus.amphi_integration.repository.EvamVehicleStateRepository;
+import com.dedalus.amphi_integration.model.evam.VehicleState;
+import com.dedalus.amphi_integration.repository.*;
 import com.dedalus.amphi_integration.service.EvamOperationService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class EvamOperationServiceImpl implements EvamOperationService {
 
     @Autowired
-    EvamOperationRepository evamOperationRepository;
+    private EvamOperationRepository evamOperationRepository;
     @Autowired
-    EvamVehicleStateRepository evamVehicleStateRepository;
+    private EvamVehicleStateRepository evamVehicleStateRepository;
     @Autowired
-    AmphiStateEntryRepository amphiStateEntryRepository;
+    private AmphiStateEntryRepository amphiStateEntryRepository;
+    @Autowired
+    private EvamMethaneReportRepository evamMethaneRepository;
+    @Autowired
+    private EvamTripLocationHistoryRepository evamTripLocationHistoryRepository;
+    @Autowired
+    private EvamVehicleStatusRepository evamVehicleStatusRepository;
+    @Autowired
+    private AmphiDestinationRepository amphiDestinationRepository;
+
+    private Gson gson;
+
+    public EvamOperationServiceImpl() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer());
+        this.gson = gsonBuilder.setPrettyPrinting().disableHtmlEscaping().create();
+    }
 
     @Override
     public Operation updateOperation(EvamOperationRequestDTO evamOperationRequestDTO) {
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer());
-        Gson gson = gsonBuilder.setPrettyPrinting().disableHtmlEscaping().create();
-
         Operation operation = gson.fromJson(evamOperationRequestDTO.getOperation(), Operation.class);
         Optional<Operation> existingOperation = evamOperationRepository.findById("1");
 
-        String oldOperation = existingOperation.map(Operation::getOperationID).orElse("");
-        String newOperation = operation.getOperationID();
-        
-        if (!oldOperation.equals(newOperation)) {
-            amphiStateEntryRepository.deleteAll();
-            evamVehicleStateRepository.deleteAll();
+        if (existingOperation.isEmpty() || !operation.getFullId().equals(existingOperation.get().getFullId())) {
+            cleanDB();
+            operation = saveNewOperation(operation);
         }
 
-        if (existingOperation.isEmpty()) {
-            operation.setId("1");
-            return evamOperationRepository.save(operation);
-        } else {
-            existingOperation.get().setOperationID(operation.getOperationID());
-            existingOperation.get().setAdditionalCoordinationInformation(operation.getAdditionalCoordinationInformation());
-            existingOperation.get().setAdditionalInfo(operation.getAdditionalInfo());
-            existingOperation.get().setAlarmCategory(operation.getAlarmCategory());
-            existingOperation.get().setAlarmEventCode(operation.getAlarmEventCode());
-            existingOperation.get().setAlarmEventText(operation.getAlarmEventText());
-            existingOperation.get().setAttachedCustomerObject(operation.getAttachedCustomerObject());
-            existingOperation.get().setAvailableHospitalLocations(operation.getAvailableHospitalLocations());
-            existingOperation.get().setAvailablePriorities(operation.getAvailablePriorities());
-            existingOperation.get().setBreakpointLocation(operation.getBreakpointLocation());
-            existingOperation.get().setCallCenterId(operation.getCallCenterId());
-            existingOperation.get().setCaseFolderId(operation.getCaseFolderId());
-            existingOperation.get().setCaseInfo(operation.getCaseInfo());
-            existingOperation.get().setCreatedTime(operation.getCreatedTime());
-            existingOperation.get().setDestinationSiteLocation(operation.getDestinationSiteLocation());
-            existingOperation.get().setElectronicKey(operation.getElectronicKey());
-            existingOperation.get().setEndTime(operation.getEndTime());
-            existingOperation.get().setEventInfo(operation.getEventInfo());
-            existingOperation.get().setHeader1(operation.getHeader1());
-            existingOperation.get().setHeader2(operation.getHeader2());
-            existingOperation.get().setKeyNumber(operation.getKeyNumber());
-            existingOperation.get().setLeavePatientLocation(operation.getLeavePatientLocation());
-            existingOperation.get().setMedicalCommander(operation.getMedicalCommander());
-            existingOperation.get().setMedicalIncidentOfficer(operation.getMedicalIncidentOfficer());
-            existingOperation.get().setName(operation.getName());
-            existingOperation.get().setOperationID(operation.getOperationID());
-            existingOperation.get().setOperationState(operation.getOperationState());
-            existingOperation.get().setPatientName(operation.getPatientName());
-            existingOperation.get().setPatientUID(operation.getPatientUID());
-            existingOperation.get().setRadioGroupMain(operation.getRadioGroupMain());
-            existingOperation.get().setRadioGroupSecondary(operation.getRadioGroupSecondary());
-            existingOperation.get().setSelectedHospital(operation.getSelectedHospital());
-            existingOperation.get().setSelectedPriority(operation.getSelectedPriority());
-            existingOperation.get().setSendTime(operation.getSendTime());
-            existingOperation.get().setTransmitterCode(operation.getTransmitterCode());
-            existingOperation.get().setVehicleStatus(operation.getVehicleStatus());
-            return evamOperationRepository.save(existingOperation.get());
-        }
+        return updateExistingOperation(existingOperation.get(), operation);
     }
 
-    /**
-     * Retrieves an Operation object by its ID.
-     * 
-     * @param operationId the ID of the operation to retrieve
-     * @return the Operation object with the specified ID, or null if not found
-     */
+    private void cleanDB() {
+        evamMethaneRepository.deleteAll();
+        evamOperationRepository.deleteAll();
+        amphiStateEntryRepository.deleteAll();
+        evamTripLocationHistoryRepository.deleteAll();
+        evamVehicleStateRepository.save(new VehicleState("1"));
+    }
+
+    private Operation saveNewOperation(Operation operation) {
+        operation.setId("1");
+        operation.setAmPHIUniqueId(UUID.randomUUID().toString());
+        return evamOperationRepository.save(operation);
+    }
+
+    private Operation updateExistingOperation(Operation existingOperation, Operation operation) {
+        existingOperation.updateFrom(operation);
+        return evamOperationRepository.save(existingOperation);
+    }
+
     @Override
     public Operation getById(String id) {
-        return evamOperationRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("No Operation found for id: %s".formatted(id)));
+        return evamOperationRepository.findById(id).orElseThrow(() -> new RuntimeException("No Operation found for id: %s".formatted(id)));
+    }
+
+    public String dateFixShort(LocalDateTime localDateTime) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Europe/Stockholm"));
+        return zonedDateTime.format(dateTimeFormatter);
     }
 }

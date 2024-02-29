@@ -29,16 +29,10 @@ public class EvamTripHistoryLocationServiceImpl implements EvamTripLocationHisto
         Gson gson = gsonBuilder.setPrettyPrinting().disableHtmlEscaping().create();
 
         TripLocationHistory tripLocationHistory = gson.fromJson(evamTripLocationHistoryRequestDTO.getTripLocationHistory(), TripLocationHistory.class);
+        evamTripLocationHistoryRepository.deleteById("1");
 
-        Optional<TripLocationHistory> existingTripLocationHistory = evamTripLocationHistoryRepository.findById("1");
-
-        if (existingTripLocationHistory.isEmpty()) {
-            tripLocationHistory.setId("1");
-            evamTripLocationHistoryRepository.save(tripLocationHistory);
-        } else {
-            existingTripLocationHistory.get().setEtaSeconds(tripLocationHistory.getEtaSeconds());
-            existingTripLocationHistory.get().setLocationHistory(tripLocationHistory.getLocationHistory());
-        }
+        tripLocationHistory.setId("1");
+        evamTripLocationHistoryRepository.save(tripLocationHistory);
 
         return tripLocationHistory;
     }

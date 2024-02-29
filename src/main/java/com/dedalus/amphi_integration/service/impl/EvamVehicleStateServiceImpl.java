@@ -15,8 +15,11 @@ import com.google.gson.GsonBuilder;
 import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamVehicleStateRequestDTO;
 import com.dedalus.amphi_integration.model.amphi.StateEntry;
+import com.dedalus.amphi_integration.model.evam.Operation;
+import com.dedalus.amphi_integration.model.evam.OperationState;
 import com.dedalus.amphi_integration.model.evam.VehicleState;
 import com.dedalus.amphi_integration.repository.AmphiStateEntryRepository;
+import com.dedalus.amphi_integration.repository.EvamOperationRepository;
 import com.dedalus.amphi_integration.repository.EvamVehicleStateRepository;
 import com.dedalus.amphi_integration.repository.EvamVehicleStatusRepository;
 import com.dedalus.amphi_integration.service.AmphiStateEntryService;
@@ -33,6 +36,8 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
     AmphiStateEntryService amphiStateEntryService;
     @Autowired
     AmphiStateEntryRepository amphiStateEntryRepository;
+    @Autowired
+    EvamOperationRepository evamOperationRepository;
 
     @Override
     public VehicleState updateVehicleState(EvamVehicleStateRequestDTO evamVehicleStateRequestDTO) {
@@ -40,8 +45,7 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeDeserializer());
         Gson gson = gsonBuilder.setPrettyPrinting().disableHtmlEscaping().create();
 
-        VehicleState vehicleState = gson.fromJson(evamVehicleStateRequestDTO.getVehicleState(),
-                VehicleState.class);
+        VehicleState vehicleState = gson.fromJson(evamVehicleStateRequestDTO.getVehicleState(),VehicleState.class);
 
         Integer previousstate;
         Optional<StateEntry> stateEntries = amphiStateEntryRepository.findAll(Sort.by(Sort.Direction.DESC, "time"))
@@ -52,50 +56,41 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
             previousstate = stateEntries.get().getTo_id();
         }
 
-        Optional<VehicleState> existingVehicleState = evamVehicleStateRepository
-                .findById("1");
-        if (existingVehicleState.isEmpty()) {
-            vehicleState.setId("1");
+        evamVehicleStateRepository.deleteById("1");;
+        vehicleState.setId("1");
 
-            String vehicleStatusName = vehicleState.getVehicleStatus().getName();
-            if (!previousstate.equals(
-                    
-                    Integer.parseInt(
-                        evamVehicleStatusRepository.findByName(vehicleStatusName).getId()
-                    )
-                    )
-                ) {
-                StateEntry stateEntry = StateEntry.builder()
-                        .from_id(0)
-                        .to_id(Integer.parseInt(evamVehicleStatusRepository
-                                .findByName(vehicleState.getVehicleStatus().getName()).getId()))
-                        .distance(0)
-                        .time(dateFix(LocalDateTime.now()))
-                        .build();
-                amphiStateEntryService.updateStateEntry(stateEntry);
-            }
-            return evamVehicleStateRepository.save(vehicleState);
-
-        } else {
-            existingVehicleState.get().setActiveCaseFullId(vehicleState.activeCaseFullId);
-            existingVehicleState.get().setTimestamp(vehicleState.timestamp);
-            existingVehicleState.get().setVehicleStatus(vehicleState.vehicleStatus);
-            existingVehicleState.get().setVehicleLocation(vehicleState.vehicleLocation);
-
-            if (!previousstate.equals(Integer.parseInt(
-                    evamVehicleStatusRepository.findByName(vehicleState.getVehicleStatus().getName()).getId()))) {
-                StateEntry stateEntry = StateEntry.builder()
-                        .from_id(previousstate)
-                        .to_id(Integer.parseInt(evamVehicleStatusRepository
-                                .findByName(vehicleState.getVehicleStatus().getName()).getId()))
-                        .distance(0)
-                        .time(dateFix(LocalDateTime.now()))
-                        .build();
-                amphiStateEntryService.updateStateEntry(stateEntry);
-            }
-            return evamVehicleStateRepository.save(existingVehicleState.get());
-
+        String vehicleStatusName = vehicleState.getVehicleStatus().getName();
+        Integer vehicleStatusId;
+        try {
+            vehicleStatusId = Integer.parseInt(evamVehicleStatusRepository.findByName(vehicleStatusName).getId());
         }
+        catch (Exception e) {
+            vehicleStatusId = 0;
+        }
+        if (!previousstate.equals(vehicleStatusId)) {
+            StateEntry stateEntry = StateEntry.builder()
+                    .from_id(0)
+                    .to_id(Integer.parseInt(evamVehicleStatusRepository
+                            .findByName(vehicleState.getVehicleStatus().getName()).getId()))
+                    .distance(0)
+                    .time(dateFix(LocalDateTime.now()))
+                    .build();
+            amphiStateEntryService.updateStateEntry(stateEntry);
+            if(stateEntry.getTo_id() >= 5) {
+                Optional<Operation> existingOperation = evamOperationRepository.findById("1");
+                if (!existingOperation.isEmpty()) {
+                    existingOperation.get().setOperationState(OperationState.AVAILABLE);
+                    evamOperationRepository.save(existingOperation.get());
+                }
+            } else {
+                Optional<Operation> existingOperation = evamOperationRepository.findById("1");
+                if (!existingOperation.isEmpty()) {
+                    existingOperation.get().setOperationState(OperationState.ACTIVE);
+                    evamOperationRepository.save(existingOperation.get());
+                }
+            }
+        }
+        return evamVehicleStateRepository.save(vehicleState);
     }
 
     @Override

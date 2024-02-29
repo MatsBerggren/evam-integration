@@ -1,17 +1,15 @@
 package com.dedalus.amphi_integration.service.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.stereotype.Service;
 import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamVehicleStatusRequestDTO;
 import com.dedalus.amphi_integration.model.evam.VehicleStatus;
 import com.dedalus.amphi_integration.repository.EvamVehicleStatusRepository;
 import com.dedalus.amphi_integration.service.EvamVehicleStatusService;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class EvamVehicleStatusServiceImpl implements EvamVehicleStatusService {
@@ -31,32 +29,15 @@ public class EvamVehicleStatusServiceImpl implements EvamVehicleStatusService {
     @Override
     public VehicleStatus[] updateVehicleStatus(EvamVehicleStatusRequestDTO evamVehicleStatusRequestDTO) {
 
-        VehicleStatus[] vehicleStatuses = gson.fromJson(evamVehicleStatusRequestDTO.getVehicleStatus(),
-                VehicleStatus[].class);
+        VehicleStatus[] vehicleStatuses = gson.fromJson(evamVehicleStatusRequestDTO.getVehicleStatus(),VehicleStatus[].class);
+        evamVehicleStatusRepository.deleteAll();
 
         for (int i = 0; i < vehicleStatuses.length; i++) {
             VehicleStatus vehicleStatus = vehicleStatuses[i];
             String id = String.valueOf(i + 1);
 
-            Optional<VehicleStatus> existingVehicleStatus = evamVehicleStatusRepository.findById(id);
-
-            VehicleStatus statusToUpdate;
-
-            if (existingVehicleStatus.isPresent()) {
-                statusToUpdate = existingVehicleStatus.get();
-                statusToUpdate.setCategoryName(vehicleStatus.getCategoryName());
-                statusToUpdate.setCategoryType(vehicleStatus.getCategoryType());
-                statusToUpdate.setEvent(vehicleStatus.getEvent());
-                statusToUpdate.setIsEndStatus(vehicleStatus.getIsEndStatus());
-                statusToUpdate.setIsStartStatus(vehicleStatus.getIsStartStatus());
-                statusToUpdate.setName(vehicleStatus.getName());
-                statusToUpdate.setSuccessorName(vehicleStatus.getSuccessorName());
-            } else {
-                vehicleStatus.setId(id);
-                statusToUpdate = vehicleStatus;
-            }
-
-            evamVehicleStatusRepository.save(statusToUpdate);
+            vehicleStatus.setId(id);
+            evamVehicleStatusRepository.save(vehicleStatus);
         }
 
         return vehicleStatuses;

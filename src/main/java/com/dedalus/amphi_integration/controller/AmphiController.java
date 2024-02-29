@@ -127,13 +127,13 @@ public class AmphiController {
         }
 
         @PostMapping(value = "/destinations/", consumes = "text/plain", produces = "application/json")
-        public String postDestinations(HttpServletRequest request, @RequestBody String json) {
+        public Destination[] postDestinations(HttpServletRequest request, @RequestBody String json) {
             Gson gson = new Gson();
             Destination[] destinations = gson.fromJson(json, Destination[].class);
             
-            Arrays.stream(destinations).distinct().forEach(amphiDestinationService::updateDestination);
+            return amphiDestinationService.updateDestinations(destinations);
             
-            return gson.toJson(destinations);
+            //return gson.toJson(destinations);
         }
         
         @GetMapping(value = "/symbols/")
@@ -153,19 +153,23 @@ public class AmphiController {
         @GetMapping(value = "/assignments/")
         public String getAssignments() {
 
-                Operation operation = evamOperationService.getById("1");
-
+            Operation operation;
+            try {
+                operation = evamOperationService.getById("1");
+            } catch (Exception e) {
+                return "[]";
+            }
                 Assignment[] assignments = new Assignment[1];
                 Assignment assignment = Assignment.builder()
                     .assignment_number(operation.getFullId())
                     .close_reason(CloseReason.builder()
-                        .comment("1")
-                        .reason("Patient saknades").build())
-                    .created("2023-10-25T14:30:00Z")
-                    .received("2023-10-25T14:31:00Z")
-                    .accepted("2023-10-25T14:32:00Z")
-                    .rowid("0faaa8e0-956b-444b-baea-ddf6e806bc8d")
-                    .is_closed(Boolean.toString(operation.operationState == OperationState.COMPLETE))
+                        .comment("")
+                        .reason("").build())
+                    .created(dateFixShort(operation.getCreatedTime()))
+                    .received(dateFixShort(operation.getSendTime()))
+                    //.accepted(dateFixShort(operation.getAcceptedTime()))
+                    .rowid(operation.amPHIUniqueId)
+                    .is_closed(Boolean.toString(operation.operationState == OperationState.AVAILABLE))
                     .is_selected(operation.operationState == OperationState.ACTIVE ? "1" : "0")
                     .is_destination_alarm_sent("false")
                     .selected_destination(operation.getSelectedHospital().toString())
@@ -357,23 +361,32 @@ public class AmphiController {
         }
 
         public String dateFix(LocalDateTime localDateTime) {
+            String returnDate;
+            if (localDateTime!=null) {
 
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSS'Z'");
                 ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Europe/Stockholm"));
 
-                String returnDate = zonedDateTime.format(dateTimeFormatter);
+                returnDate = zonedDateTime.format(dateTimeFormatter);
+            } else {
+                returnDate = null;
+            }
 
                 return returnDate;
         }
 
         public String dateFixShort(LocalDateTime localDateTime) {
-
+            String returnDate;
+            if (localDateTime!=null) {
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
                 ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Europe/Stockholm"));
 
-                String returnDate = zonedDateTime.format(dateTimeFormatter);
+                returnDate = zonedDateTime.format(dateTimeFormatter);
+            } else {
+                returnDate = null;
+            }
 
-                return returnDate;
+            return returnDate;
         }
 
 }

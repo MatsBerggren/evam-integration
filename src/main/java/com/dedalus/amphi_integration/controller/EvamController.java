@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dedalus.amphi_integration.dto.EvamOperationRequestDTO;
+import com.dedalus.amphi_integration.dto.EvamOperationListRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamRakelStateRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamTripLocationHistoryRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamMethaneReportRequestDTO;
@@ -18,11 +19,13 @@ import com.dedalus.amphi_integration.dto.EvamVehicleStateRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamVehicleStatusRequestDTO;
 import com.dedalus.amphi_integration.model.amphi.MethaneReport;
 import com.dedalus.amphi_integration.model.evam.Operation;
+import com.dedalus.amphi_integration.model.evam.OperationList;
 import com.dedalus.amphi_integration.model.evam.RakelState;
 import com.dedalus.amphi_integration.model.evam.TripLocationHistory;
 import com.dedalus.amphi_integration.model.evam.VehicleState;
 import com.dedalus.amphi_integration.model.evam.VehicleStatus;
 import com.dedalus.amphi_integration.service.EvamMethaneReportService;
+import com.dedalus.amphi_integration.service.EvamOperationListService;
 import com.dedalus.amphi_integration.service.EvamOperationService;
 import com.dedalus.amphi_integration.service.EvamRakelStateService;
 import com.dedalus.amphi_integration.service.EvamTripLocationHistoryService;
@@ -39,6 +42,8 @@ public class EvamController {
 
     @Autowired
     EvamOperationService evamOperationService;
+    @Autowired
+    EvamOperationListService evamOperationListService;
     @Autowired
     EvamVehicleStateService evamVehicleStateService;
     @Autowired
@@ -58,33 +63,47 @@ public class EvamController {
     @PostMapping(value = "/operations", produces = "application/json")
     public Operation createNew(@RequestBody EvamOperationRequestDTO evamOperationRequestDTO) {
         System.out.println(evamOperationRequestDTO);
-        return evamOperationService.updateOperation(evamOperationRequestDTO);
+        if (evamOperationRequestDTO.getOperation() != null) {
+            return evamOperationService.updateOperation(evamOperationRequestDTO);
+        } else {
+            Operation operation = null;
+            return operation;
+        }
+    }
+
+    @PostMapping(value = "/operationlist", produces = "application/json")
+    public OperationList createNew(@RequestBody EvamOperationListRequestDTO evamOperationListRequestDTO) {
+        System.out.println(evamOperationListRequestDTO);
+        return evamOperationListService.updateOperationList(evamOperationListRequestDTO);
     }
 
     @PostMapping(value = "/vehiclestate", produces = "application/json")
     public VehicleState createNew(@RequestBody EvamVehicleStateRequestDTO evamVehicleStateRequestDTO) {
+        System.out.println(evamVehicleStateRequestDTO);
         return evamVehicleStateService.updateVehicleState(evamVehicleStateRequestDTO);
     }
 
     @PostMapping(value = "/rakelstate", produces = "application/json")
     public RakelState createNew(@RequestBody EvamRakelStateRequestDTO evamRakelStateRequestDTO) {
+        System.out.println(evamRakelStateRequestDTO);
         return evamRakelStateService.updateRakelState(evamRakelStateRequestDTO);
     }
 
     @PostMapping(value = "/vehiclestatus", produces = "application/json")
     public VehicleStatus[] createNew(@RequestBody EvamVehicleStatusRequestDTO evamVehicleStatusRequestDTO) {
+        System.out.println(evamVehicleStatusRequestDTO);
         return evamVehicleStatusService.updateVehicleStatus(evamVehicleStatusRequestDTO);
     }
 
     @PostMapping(value = "/triplocationhistory", produces = "application/json")
-    public TripLocationHistory createNew(
-            @RequestBody EvamTripLocationHistoryRequestDTO evamTripLocationHistoryRequestDTO) {
+    public TripLocationHistory createNew(@RequestBody EvamTripLocationHistoryRequestDTO evamTripLocationHistoryRequestDTO) {
+        System.out.println(evamTripLocationHistoryRequestDTO);
         return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
     }
 
     @PostMapping(value = "/methanereport", produces = "application/json")
-    public MethaneReport createNew(
-            @RequestBody EvamMethaneReportRequestDTO evamMethaneReportRequestDTO) {
+    public MethaneReport createNew(@RequestBody EvamMethaneReportRequestDTO evamMethaneReportRequestDTO) {
+        System.out.println(evamMethaneReportRequestDTO);
         return evamMethaneReportService.updateMethaneReport(evamMethaneReportRequestDTO);
     }
 }
