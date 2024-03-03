@@ -1,5 +1,6 @@
 package com.dedalus.amphi_integration.service.impl;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,11 @@ public class AmphiDestinationServiceImpl implements AmphiDestinationService {
     @Override
     public Destination getByNameAndType(String name, String type) {
         return amphiDestinationRepository.findByNameAndType(name, type);
+    }
+
+    @Override
+    public List<Destination> getAllDestinations() {
+        return amphiDestinationRepository.findAll();
     }
 
 }

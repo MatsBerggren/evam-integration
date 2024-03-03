@@ -1,5 +1,8 @@
 package com.dedalus.amphi_integration.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +20,18 @@ import com.dedalus.amphi_integration.dto.EvamTripLocationHistoryRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamMethaneReportRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamVehicleStateRequestDTO;
 import com.dedalus.amphi_integration.dto.EvamVehicleStatusRequestDTO;
+import com.dedalus.amphi_integration.model.amphi.Destination;
 import com.dedalus.amphi_integration.model.amphi.MethaneReport;
+import com.dedalus.amphi_integration.model.amphi.Position;
+import com.dedalus.amphi_integration.model.amphi.Ward;
+import com.dedalus.amphi_integration.model.evam.HospitalLocation;
 import com.dedalus.amphi_integration.model.evam.Operation;
 import com.dedalus.amphi_integration.model.evam.OperationList;
 import com.dedalus.amphi_integration.model.evam.RakelState;
 import com.dedalus.amphi_integration.model.evam.TripLocationHistory;
 import com.dedalus.amphi_integration.model.evam.VehicleState;
 import com.dedalus.amphi_integration.model.evam.VehicleStatus;
+import com.dedalus.amphi_integration.service.AmphiDestinationService;
 import com.dedalus.amphi_integration.service.EvamMethaneReportService;
 import com.dedalus.amphi_integration.service.EvamOperationListService;
 import com.dedalus.amphi_integration.service.EvamOperationService;
@@ -31,7 +39,7 @@ import com.dedalus.amphi_integration.service.EvamRakelStateService;
 import com.dedalus.amphi_integration.service.EvamTripLocationHistoryService;
 import com.dedalus.amphi_integration.service.EvamVehicleStateService;
 import com.dedalus.amphi_integration.service.EvamVehicleStatusService;
-
+import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -54,6 +62,8 @@ public class EvamController {
     EvamTripLocationHistoryService evamTripLocationHistoryService;
     @Autowired
     EvamMethaneReportService evamMethaneReportService;
+    @Autowired
+    AmphiDestinationService amphiDestinationService;
 
     @GetMapping
     public Operation getById(@RequestParam String operationId) {
@@ -73,8 +83,34 @@ public class EvamController {
 
     @PostMapping(value = "/operationlist", produces = "application/json")
     public OperationList createNew(@RequestBody EvamOperationListRequestDTO evamOperationListRequestDTO) {
-        System.out.println(evamOperationListRequestDTO);
-        return evamOperationListService.updateOperationList(evamOperationListRequestDTO);
+        if (evamOperationListRequestDTO.getOperationList() != null) {
+            System.out.println(evamOperationListRequestDTO);
+            return evamOperationListService.updateOperationList(evamOperationListRequestDTO);
+        } else {
+            OperationList operationList = null;
+            return operationList;
+        }
+    }
+
+    @GetMapping(value = "/hospitallocations", produces = "application/json")
+    public String getHospitalLocations() {
+        List<Destination> destinations = amphiDestinationService.getAllDestinations();
+        Gson gson = new Gson();
+
+        ArrayList<HospitalLocation> hospitalLocations = new ArrayList<>();
+        for (Destination destination : destinations) {
+            for ( Ward ward : destination.getWards()) {
+                HospitalLocation hospitalLocation =  HospitalLocation.builder()
+                    .id(Integer.parseInt(ward.getId()))
+                    .latitude(Optional.ofNullable(ward).map(Ward::getPosition).map(Position::getWgs84_dd_la).orElse(null))
+                    .longitude(Optional.ofNullable(ward).map(Ward::getPosition).map(Position::getWgs84_dd_lo).orElse(null))
+                    .name(destination.getName() + " " + ward.getName())
+                    .build();
+
+                    hospitalLocations.add(hospitalLocation);
+            }
+        }
+        return gson.toJson(hospitalLocations);
     }
 
     @PostMapping(value = "/vehiclestate", produces = "application/json")

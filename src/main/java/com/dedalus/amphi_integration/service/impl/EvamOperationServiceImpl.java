@@ -1,9 +1,6 @@
 package com.dedalus.amphi_integration.service.impl;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +9,11 @@ import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamOperationRequestDTO;
 import com.dedalus.amphi_integration.model.evam.Operation;
 import com.dedalus.amphi_integration.model.evam.VehicleState;
-import com.dedalus.amphi_integration.repository.*;
+import com.dedalus.amphi_integration.repository.AmphiStateEntryRepository;
+import com.dedalus.amphi_integration.repository.EvamMethaneReportRepository;
+import com.dedalus.amphi_integration.repository.EvamOperationRepository;
+import com.dedalus.amphi_integration.repository.EvamTripLocationHistoryRepository;
+import com.dedalus.amphi_integration.repository.EvamVehicleStateRepository;
 import com.dedalus.amphi_integration.service.EvamOperationService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,10 +31,6 @@ public class EvamOperationServiceImpl implements EvamOperationService {
     private EvamMethaneReportRepository evamMethaneRepository;
     @Autowired
     private EvamTripLocationHistoryRepository evamTripLocationHistoryRepository;
-    @Autowired
-    private EvamVehicleStatusRepository evamVehicleStatusRepository;
-    @Autowired
-    private AmphiDestinationRepository amphiDestinationRepository;
 
     private Gson gson;
 
@@ -62,7 +59,7 @@ public class EvamOperationServiceImpl implements EvamOperationService {
         evamOperationRepository.deleteAll();
         amphiStateEntryRepository.deleteAll();
         evamTripLocationHistoryRepository.deleteAll();
-        evamVehicleStateRepository.save(new VehicleState("1"));
+        evamVehicleStateRepository.save(VehicleState.builder().id("1").build());
     }
 
     private Operation saveNewOperation(Operation operation) {
@@ -81,9 +78,4 @@ public class EvamOperationServiceImpl implements EvamOperationService {
         return evamOperationRepository.findById(id).orElseThrow(() -> new RuntimeException("No Operation found for id: %s".formatted(id)));
     }
 
-    public String dateFixShort(LocalDateTime localDateTime) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Europe/Stockholm"));
-        return zonedDateTime.format(dateTimeFormatter);
-    }
 }

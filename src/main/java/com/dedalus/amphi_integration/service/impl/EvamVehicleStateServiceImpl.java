@@ -1,29 +1,26 @@
 package com.dedalus.amphi_integration.service.impl;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.dedalus.amphi_integration.classes.DateFix;
 import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamVehicleStateRequestDTO;
 import com.dedalus.amphi_integration.model.amphi.StateEntry;
 import com.dedalus.amphi_integration.model.evam.Operation;
 import com.dedalus.amphi_integration.model.evam.OperationState;
 import com.dedalus.amphi_integration.model.evam.VehicleState;
+import com.dedalus.amphi_integration.model.evam.VehicleStatus;
 import com.dedalus.amphi_integration.repository.AmphiStateEntryRepository;
 import com.dedalus.amphi_integration.repository.EvamOperationRepository;
 import com.dedalus.amphi_integration.repository.EvamVehicleStateRepository;
 import com.dedalus.amphi_integration.repository.EvamVehicleStatusRepository;
 import com.dedalus.amphi_integration.service.AmphiStateEntryService;
 import com.dedalus.amphi_integration.service.EvamVehicleStateService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
@@ -70,10 +67,12 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
         if (!previousstate.equals(vehicleStatusId)) {
             StateEntry stateEntry = StateEntry.builder()
                     .from_id(0)
-                    .to_id(Integer.parseInt(evamVehicleStatusRepository
-                            .findByName(vehicleState.getVehicleStatus().getName()).getId()))
+                    .to_id(Integer.parseInt(evamVehicleStatusRepository.findByName(Optional.ofNullable(vehicleState)
+                                                                                                .map(VehicleState::getVehicleStatus)
+                                                                                                .map(VehicleStatus::getName)
+                                                                                                .orElse("")).getId()))
                     .distance(0)
-                    .time(dateFix(LocalDateTime.now()))
+                    .time(DateFix.dateFix(LocalDateTime.now()))
                     .build();
             amphiStateEntryService.updateStateEntry(stateEntry);
             if(stateEntry.getTo_id() >= 5) {
@@ -99,13 +98,4 @@ public class EvamVehicleStateServiceImpl implements EvamVehicleStateService {
                 () -> new RuntimeException("No VehicleState found for id: %s".formatted(id)));
     }
 
-    private String dateFix(LocalDateTime localDateTime) {
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-
-        String returnDate = zonedDateTime.format(dateTimeFormatter);
-
-        return returnDate;
-    }
 }

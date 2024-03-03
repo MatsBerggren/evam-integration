@@ -2,18 +2,15 @@ package com.dedalus.amphi_integration.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.dedalus.amphi_integration.classes.LocalDateTimeDeserializer;
 import com.dedalus.amphi_integration.dto.EvamTripLocationHistoryRequestDTO;
 import com.dedalus.amphi_integration.model.evam.TripLocationHistory;
 import com.dedalus.amphi_integration.repository.EvamTripLocationHistoryRepository;
 import com.dedalus.amphi_integration.service.EvamTripLocationHistoryService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class EvamTripHistoryLocationServiceImpl implements EvamTripLocationHistoryService {
