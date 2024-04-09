@@ -3,11 +3,34 @@ package com.dedalus.amphi_integration.controller;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import com.dedalus.amphi_integration.classes.LocalDateTimeSerializer;
-import com.dedalus.amphi_integration.model.amphi.*;
-import com.dedalus.amphi_integration.model.evam.*;
-import com.dedalus.amphi_integration.service.*;
+import com.dedalus.amphi_integration.model.amphi.AllowedState;
+import com.dedalus.amphi_integration.model.amphi.Destination;
+import com.dedalus.amphi_integration.model.amphi.Position;
+import com.dedalus.amphi_integration.model.amphi.State;
+import com.dedalus.amphi_integration.model.amphi.Symbol;
+import com.dedalus.amphi_integration.model.amphi.Unit;
+import com.dedalus.amphi_integration.model.amphi.Ward;
+import com.dedalus.amphi_integration.model.evam.HospitalLocation;
+import com.dedalus.amphi_integration.model.evam.Operation;
+import com.dedalus.amphi_integration.model.evam.RakelState;
+import com.dedalus.amphi_integration.model.evam.VehicleState;
+import com.dedalus.amphi_integration.model.evam.VehicleStatus;
+import com.dedalus.amphi_integration.service.AmphiAssignmentService;
+import com.dedalus.amphi_integration.service.AmphiDestinationService;
+import com.dedalus.amphi_integration.service.EvamOperationService;
+import com.dedalus.amphi_integration.service.EvamRakelStateService;
+import com.dedalus.amphi_integration.service.EvamVehicleStateService;
+import com.dedalus.amphi_integration.service.EvamVehicleStatusService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +40,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/rest")
 @Tag(name = "amPHI API", description = "API collection for CRUD operations on Amphi Resource")
 public class AmphiController {
+
+    private volatile boolean timeExceeded = true;
+
+    @EventListener
+    public void handleTimeExceededEvent(TimeExceededEvent event) {
+        timeExceeded = event.getTimeExceeded();
+    }
 
     @Autowired
     private EvamOperationService evamOperationService;
@@ -32,12 +62,20 @@ public class AmphiController {
     private EvamVehicleStatusService evamVehicleStatusService;
 
     @GetMapping(value = "/apiversion/")
-    public String getCsamInterfaceVersion() {
-        return "2.0.0";
+    public ResponseEntity<String> getCsamInterfaceVersion() {
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+        return ResponseEntity.ok("2.0.0");
     }
 
     @GetMapping(value = "/unit/")
-    public String getCsamUnit() {
+    public ResponseEntity<String> getCsamUnit() {
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        
         String unitId = "1";
         RakelState rakelState = evamRakelStateService.getById(unitId);
         VehicleState vehicleState = evamVehicleStateService.getById(unitId);
@@ -55,11 +93,15 @@ public class AmphiController {
                 .state(getState(vehicleState.getVehicleStatus()))
                 .build();
 
-        return new Gson().toJson(unit);
+        return ResponseEntity.ok(new Gson().toJson(unit));
     }
 
     @GetMapping(value = "/destinations/")
-    public String getDestinations() {
+    public ResponseEntity<String> getDestinations() {
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
         Operation operation = evamOperationService.getById("1");
         Gson gson = new Gson();
 
@@ -78,7 +120,7 @@ public class AmphiController {
 
             destinations.add(destination);
         }
-        return gson.toJson(destinations);
+        return ResponseEntity.ok(gson.toJson(destinations));
     }
 
     @PostMapping(value = "/destinations/", consumes = "text/plain", produces = "application/json")
@@ -87,21 +129,29 @@ public class AmphiController {
     }
 
     @GetMapping(value = "/symbols/")
-    public String getSymbols() {
-        return new Gson().toJson(new Symbol[1]);
+    public ResponseEntity<String> getSymbols() {
+        return ResponseEntity.ok(new Gson().toJson(new Symbol[1]));
     }
 
     @PostMapping(value = "/symbols/", consumes = "application/json", produces = "application/json")
-    public String postSymbols(@RequestBody Symbol bean) {
-        return "OK";
+    public ResponseEntity<String> postSymbols(@RequestBody Symbol bean) {
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+        return ResponseEntity.ok("ok");
     }
 
     @GetMapping(value = "/assignments/")
-    public String getAssignments() {
+    public ResponseEntity<String> getAssignments() {
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
         Gson gson = gsonBuilder.disableHtmlEscaping().create();
-        return gson.toJson(amphiAssignmentService.getAllAssignments());
+        return ResponseEntity.ok(gson.toJson(amphiAssignmentService.getAllAssignments()));
     }
 
     private State getState(VehicleStatus selectedVehicleStatus) {

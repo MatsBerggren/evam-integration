@@ -1,7 +1,7 @@
 package com.dedalus.amphi_integration.model.evam;
 
 import java.time.LocalDateTime;
-
+import java.util.Optional;
 import org.springframework.data.annotation.Id;
 
 import lombok.Builder;
@@ -49,47 +49,58 @@ public class Operation {
     public String selectedPriority;
     public OperationState operationState;
     public LeavePatientLocation leavePatientLocation;
+    public String assignedResourceMissionNo;
+    public OperationUnit[] operationUnits;
 
     public String getFullId() {
-        return this.callCenterId + ":" + this.caseFolderId + ":" + this.operationID;
+        String missionNo = "0";
+        if (this.assignedResourceMissionNo != null) {
+            String[] textSplit = this.assignedResourceMissionNo.split("\u0016");
+            if (textSplit.length > 1) {
+                missionNo = textSplit[1];
+            }
+        }
+        return this.callCenterId + ":" + this.caseFolderId + ":" + this.operationID + ":" + missionNo;
     }
 
     public void updateFrom(Operation other) {
-        this.setOperationID(other.getOperationID());
-        this.setAdditionalCoordinationInformation(other.getAdditionalCoordinationInformation());
-        this.setAdditionalInfo(other.getAdditionalInfo());
-        this.setAlarmCategory(other.getAlarmCategory());
-        this.setAlarmEventCode(other.getAlarmEventCode());
-        this.setAlarmEventText(other.getAlarmEventText());
-        this.setAttachedCustomerObject(other.getAttachedCustomerObject());
-        this.setAvailableHospitalLocations(other.getAvailableHospitalLocations());
-        this.setAvailablePriorities(other.getAvailablePriorities());
-        this.setBreakpointLocation(other.getBreakpointLocation());
-        this.setCallCenterId(other.getCallCenterId());
-        this.setCaseFolderId(other.getCaseFolderId());
-        this.setCaseInfo(other.getCaseInfo());
-        this.setCreatedTime(other.getCreatedTime());
-        this.setDestinationSiteLocation(other.getDestinationSiteLocation());
-        this.setElectronicKey(other.getElectronicKey());
-        this.setEndTime(other.getEndTime());
-        this.setEventInfo(other.getEventInfo());
-        this.setHeader1(other.getHeader1());
-        this.setHeader2(other.getHeader2());
-        this.setKeyNumber(other.getKeyNumber());
-        this.setLeavePatientLocation(other.getLeavePatientLocation());
-        this.setMedicalCommander(other.getMedicalCommander());
-        this.setMedicalIncidentOfficer(other.getMedicalIncidentOfficer());
-        this.setName(other.getName());
-        this.setOperationID(other.getOperationID());
-        this.setOperationState(other.getOperationState());
-        this.setPatientName(other.getPatientName());
-        this.setPatientUID(other.getPatientUID());
-        this.setRadioGroupMain(other.getRadioGroupMain());
-        this.setRadioGroupSecondary(other.getRadioGroupSecondary());
-        this.setSelectedHospital(other.getSelectedHospital());
-        this.setSelectedPriority(other.getSelectedPriority());
-        this.setSendTime(other.getSendTime());
-        this.setTransmitterCode(other.getTransmitterCode());
-        this.setVehicleStatus(other.getVehicleStatus());
+        Optional.ofNullable(other.getOperationID()).ifPresent(this::setOperationID);
+        Optional.ofNullable(other.getName()).ifPresent(this::setName);
+        Optional.ofNullable(other.getSendTime()).ifPresent(this::setSendTime);
+        Optional.ofNullable(other.getCreatedTime()).ifPresent(this::setCreatedTime);
+        Optional.ofNullable(other.getEndTime()).ifPresent(this::setEndTime);
+        Optional.ofNullable(other.getAcceptedTime()).ifPresent(this::setAcceptedTime);
+        Optional.ofNullable(other.getCallCenterId()).ifPresent(this::setCallCenterId);
+        Optional.ofNullable(other.getCaseFolderId()).ifPresent(this::setCaseFolderId);
+        Optional.ofNullable(other.getTransmitterCode()).ifPresent(this::setTransmitterCode);
+        Optional.ofNullable(other.getAlarmCategory()).ifPresent(this::setAlarmCategory);
+        Optional.ofNullable(other.getAlarmEventCode()).ifPresent(this::setAlarmEventCode);
+        Optional.ofNullable(other.getMedicalCommander()).ifPresent(this::setMedicalCommander);
+        Optional.ofNullable(other.getMedicalIncidentOfficer()).ifPresent(this::setMedicalIncidentOfficer);
+        Optional.ofNullable(other.getAttachedCustomerObject()).ifPresent(this::setAttachedCustomerObject);
+        Optional.ofNullable(other.getAlarmEventText()).ifPresent(this::setAlarmEventText);
+        Optional.ofNullable(other.getAdditionalInfo()).ifPresent(this::setAdditionalInfo);
+        Optional.ofNullable(other.getKeyNumber()).ifPresent(this::setKeyNumber);
+        Optional.ofNullable(other.getElectronicKey()).ifPresent(this::setElectronicKey);
+        Optional.ofNullable(other.getRadioGroupMain()).ifPresent(this::setRadioGroupMain);
+        Optional.ofNullable(other.getRadioGroupSecondary()).ifPresent(this::setRadioGroupSecondary);
+        Optional.ofNullable(other.getAdditionalCoordinationInformation()).ifPresent(this::setAdditionalCoordinationInformation);
+        Optional.ofNullable(other.getAvailablePriorities()).ifPresent(this::setAvailablePriorities);
+        Optional.ofNullable(other.getPatientName()).ifPresent(this::setPatientName);
+        Optional.ofNullable(other.getPatientUID()).ifPresent(this::setPatientUID);
+        Optional.ofNullable(other.getVehicleStatus()).ifPresent(this::setVehicleStatus);
+        Optional.ofNullable(other.getDestinationSiteLocation()).ifPresent(this::setDestinationSiteLocation);
+        Optional.ofNullable(other.getBreakpointLocation()).ifPresent(this::setBreakpointLocation);
+        Optional.ofNullable(other.getAvailableHospitalLocations()).ifPresent(this::setAvailableHospitalLocations);
+        Optional.ofNullable(other.getHeader1()).ifPresent(this::setHeader1);
+        Optional.ofNullable(other.getHeader2()).ifPresent(this::setHeader2);
+        Optional.ofNullable(other.getEventInfo()).ifPresent(this::setEventInfo);
+        Optional.ofNullable(other.getCaseInfo()).ifPresent(this::setCaseInfo);
+        Optional.ofNullable(other.getSelectedHospital()).ifPresent(this::setSelectedHospital);
+        Optional.ofNullable(other.getSelectedPriority()).ifPresent(this::setSelectedPriority);
+        Optional.ofNullable(other.getOperationState()).ifPresent(this::setOperationState);
+        Optional.ofNullable(other.getLeavePatientLocation()).ifPresent(this::setLeavePatientLocation);
+        Optional.ofNullable(other.getAssignedResourceMissionNo()).ifPresent(this::setAssignedResourceMissionNo);
+        Optional.ofNullable(other.getOperationUnits()).ifPresent(this::setOperationUnits);
     }
 }

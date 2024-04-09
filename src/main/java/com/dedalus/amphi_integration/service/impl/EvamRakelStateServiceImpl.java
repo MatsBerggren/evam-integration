@@ -27,7 +27,11 @@ public class EvamRakelStateServiceImpl implements EvamRakelStateService {
             rakelState.setUnitId("1");
             return evamRakelStateRepository.save(rakelState);
         } else {
-            existingRakelState.get().setMsisdn(rakelState.getMsisdn());
+            if(rakelState.getMsisdn().equals("0000567")) {
+                existingRakelState.get().setMsisdn("3393090");    
+            } else {
+                existingRakelState.get().setMsisdn(rakelState.getMsisdn());
+            }
             existingRakelState.get().setIssi(rakelState.getIssi());
             existingRakelState.get().setGssi(rakelState.getGssi());
             return evamRakelStateRepository.save(existingRakelState.get());

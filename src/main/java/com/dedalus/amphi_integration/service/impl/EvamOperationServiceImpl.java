@@ -64,6 +64,7 @@ public class EvamOperationServiceImpl implements EvamOperationService {
 
     private Operation saveNewOperation(Operation operation) {
         operation.setId("1");
+        operation.setSelectedHospital("");
         operation.setAmPHIUniqueId(UUID.randomUUID().toString());
         return evamOperationRepository.save(operation);
     }

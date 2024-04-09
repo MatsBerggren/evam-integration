@@ -1,9 +1,14 @@
 package com.dedalus.amphi_integration.controller;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +53,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Evam API", description = "API collection for CRUD operations on Evam Resource")
 public class EvamController {
 
+    private static Instant lastCallTime = Instant.now();
+    private final ApplicationEventPublisher eventPublisher;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    public EvamController(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+        scheduler.scheduleAtFixedRate(this::checkTimeSinceLastCall, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private void checkTimeSinceLastCall() {
+        Instant now = Instant.now();
+        if (lastCallTime != null && now.getEpochSecond() - lastCallTime.getEpochSecond() > 40) {
+            eventPublisher.publishEvent(new TimeExceededEvent(this,true));
+        } else {
+            eventPublisher.publishEvent(new TimeExceededEvent(this,false));
+        } 
+    }
+    
     @Autowired
     EvamOperationService evamOperationService;
     @Autowired
@@ -67,11 +89,13 @@ public class EvamController {
 
     @GetMapping
     public Operation getById(@RequestParam String operationId) {
+        lastCallTime = Instant.now();
         return evamOperationService.getById(operationId);
     }
 
     @PostMapping(value = "/operations", produces = "application/json")
     public Operation createNew(@RequestBody EvamOperationRequestDTO evamOperationRequestDTO) {
+        lastCallTime = Instant.now();
         System.out.println(evamOperationRequestDTO);
         if (evamOperationRequestDTO.getOperation() != null) {
             return evamOperationService.updateOperation(evamOperationRequestDTO);
@@ -83,6 +107,7 @@ public class EvamController {
 
     @PostMapping(value = "/operationlist", produces = "application/json")
     public OperationList createNew(@RequestBody EvamOperationListRequestDTO evamOperationListRequestDTO) {
+        lastCallTime = Instant.now();        
         if (evamOperationListRequestDTO.getOperationList() != null) {
             System.out.println(evamOperationListRequestDTO);
             return evamOperationListService.updateOperationList(evamOperationListRequestDTO);
@@ -94,6 +119,7 @@ public class EvamController {
 
     @GetMapping(value = "/hospitallocations", produces = "application/json")
     public String getHospitalLocations() {
+        lastCallTime = Instant.now();
         List<Destination> destinations = amphiDestinationService.getAllDestinations();
         Gson gson = new Gson();
 
@@ -115,31 +141,32 @@ public class EvamController {
 
     @PostMapping(value = "/vehiclestate", produces = "application/json")
     public VehicleState createNew(@RequestBody EvamVehicleStateRequestDTO evamVehicleStateRequestDTO) {
-        System.out.println(evamVehicleStateRequestDTO);
+        lastCallTime = Instant.now();
         return evamVehicleStateService.updateVehicleState(evamVehicleStateRequestDTO);
     }
 
     @PostMapping(value = "/rakelstate", produces = "application/json")
     public RakelState createNew(@RequestBody EvamRakelStateRequestDTO evamRakelStateRequestDTO) {
-        System.out.println(evamRakelStateRequestDTO);
+        lastCallTime = Instant.now();
         return evamRakelStateService.updateRakelState(evamRakelStateRequestDTO);
     }
 
     @PostMapping(value = "/vehiclestatus", produces = "application/json")
     public VehicleStatus[] createNew(@RequestBody EvamVehicleStatusRequestDTO evamVehicleStatusRequestDTO) {
-        System.out.println(evamVehicleStatusRequestDTO);
+        lastCallTime = Instant.now();
         return evamVehicleStatusService.updateVehicleStatus(evamVehicleStatusRequestDTO);
     }
 
     @PostMapping(value = "/triplocationhistory", produces = "application/json")
     public TripLocationHistory createNew(@RequestBody EvamTripLocationHistoryRequestDTO evamTripLocationHistoryRequestDTO) {
-        System.out.println(evamTripLocationHistoryRequestDTO);
-        return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
+        lastCallTime = Instant.now();
+//        return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
+        return null;
     }
 
     @PostMapping(value = "/methanereport", produces = "application/json")
     public MethaneReport createNew(@RequestBody EvamMethaneReportRequestDTO evamMethaneReportRequestDTO) {
-        System.out.println(evamMethaneReportRequestDTO);
+        lastCallTime = Instant.now();
         return evamMethaneReportService.updateMethaneReport(evamMethaneReportRequestDTO);
     }
 }

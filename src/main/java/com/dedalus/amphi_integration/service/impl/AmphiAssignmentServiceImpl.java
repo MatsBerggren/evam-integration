@@ -71,8 +71,8 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
             .is_head_unit("false")
             .is_routed("false")
             .distance("0")
-            .methane_report(getMethaneReport(operation))
-            .rek_report(getRekReport(operation))
+            .methane_report(MethaneReport.builder().build()) // getMethaneReport(operation)
+            .rek_report(RekReport.builder().build()) // getRekReport(operation)
             .position(null)
             .to_position(ToPosition.builder()
                 .wgs84_dd_la(operation.destinationSiteLocation.getLatitude())
@@ -141,7 +141,7 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
 
         String[] s = operation.getPatientName().split(" ");
 
-        properties.add(Property.builder().name("created").value("2011-12-12 16:31").build());
+        properties.add(Property.builder().name("created").value(Objects.toString(operation.getCreatedTime().format(dateTimeFormatter), "")).build());
         properties.add(Property.builder().name("sender").value(Objects.toString(operation.getTransmitterCode(), "")).build());
         properties.add(Property.builder().name("central").value(Objects.toString(operation.getCallCenterId(), "")).build());
         properties.add(Property.builder().name("area").value(Objects.toString(null, "")).build());
