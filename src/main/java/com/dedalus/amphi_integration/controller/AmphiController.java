@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.dedalus.amphi_integration.classes.LocalDateTimeSerializer;
 import com.dedalus.amphi_integration.model.amphi.AllowedState;
+import com.dedalus.amphi_integration.model.amphi.Assignment;
 import com.dedalus.amphi_integration.model.amphi.Destination;
 import com.dedalus.amphi_integration.model.amphi.Position;
 import com.dedalus.amphi_integration.model.amphi.State;
@@ -34,6 +35,7 @@ import com.dedalus.amphi_integration.service.EvamVehicleStatusService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @CrossOrigin
@@ -71,7 +73,8 @@ public class AmphiController {
     }
 
     @GetMapping(value = "/unit/")
-    public ResponseEntity<String> getCsamUnit() {
+    public ResponseEntity<String> getCsamUnit(HttpServletRequest request) {
+        
         if (timeExceeded) {
             return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
         }
@@ -123,14 +126,41 @@ public class AmphiController {
         return ResponseEntity.ok(gson.toJson(destinations));
     }
 
-    @PostMapping(value = "/destinations/", consumes = "text/plain", produces = "application/json")
+    @PostMapping(value = "/destinations/", consumes = {"application/json"}, produces = "application/json")
     public Destination[] postDestinations(@RequestBody String json) {
         return amphiDestinationService.updateDestinations(new Gson().fromJson(json, Destination[].class));
     }
 
     @GetMapping(value = "/symbols/")
     public ResponseEntity<String> getSymbols() {
-        return ResponseEntity.ok(new Gson().toJson(new Symbol[1]));
+        if (timeExceeded) {
+            return new ResponseEntity<>("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        
+        String unitId = "1";
+        Operation operation = evamOperationService.getById(unitId);
+        RakelState rakelState = evamRakelStateService.getById(unitId);
+        VehicleState vehicleState = evamVehicleStateService.getById(unitId);
+
+        Position position = Position.builder()
+                .wgs84_dd_la(vehicleState.getVehicleLocation().getLatitude())
+                .wgs84_dd_lo(vehicleState.getVehicleLocation().getLongitude())
+                .build();
+
+        Symbol symbol = Symbol.builder()
+                .assignmentId(operation.amPHIUniqueId)
+                .description(rakelState.getMsisdn())
+                .heading(0)
+                .id(rakelState.getUnitId())
+                .is_deleted(false)
+                .mapitemtype(0)
+                .position(position)
+                .state(getState(vehicleState.getVehicleStatus()))
+                .unitId(rakelState.getMsisdn())
+                .build();
+
+        return ResponseEntity.ok(new Gson().toJson(symbol));
+        //return ResponseEntity.ok(new Gson().toJson(new Symbol[1]));
     }
 
     @PostMapping(value = "/symbols/", consumes = "application/json", produces = "application/json")

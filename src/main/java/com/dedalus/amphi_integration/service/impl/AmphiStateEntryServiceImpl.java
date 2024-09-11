@@ -18,8 +18,7 @@ public class AmphiStateEntryServiceImpl implements AmphiStateEntryService {
 
     @Override
     public StateEntry updateStateEntry(StateEntry stateEntry) {
-        Optional<StateEntry> existingStateEntry = amphiStateEntryRepository
-                .findById(stateEntry.getFrom_id().toString());
+        Optional<StateEntry> existingStateEntry = amphiStateEntryRepository.findById(stateEntry.getFrom_id().toString());
 
         if (existingStateEntry.isEmpty()) {
             return amphiStateEntryRepository.save(stateEntry);

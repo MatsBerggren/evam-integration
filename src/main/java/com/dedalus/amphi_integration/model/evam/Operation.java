@@ -64,6 +64,7 @@ public class Operation {
     }
 
     public void updateFrom(Operation other) {
+        Optional.ofNullable(other.getAmPHIUniqueId()).ifPresent(this::setAmPHIUniqueId);
         Optional.ofNullable(other.getOperationID()).ifPresent(this::setOperationID);
         Optional.ofNullable(other.getName()).ifPresent(this::setName);
         Optional.ofNullable(other.getSendTime()).ifPresent(this::setSendTime);

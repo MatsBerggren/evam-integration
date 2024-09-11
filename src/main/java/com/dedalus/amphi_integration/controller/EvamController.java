@@ -160,8 +160,8 @@ public class EvamController {
     @PostMapping(value = "/triplocationhistory", produces = "application/json")
     public TripLocationHistory createNew(@RequestBody EvamTripLocationHistoryRequestDTO evamTripLocationHistoryRequestDTO) {
         lastCallTime = Instant.now();
-//        return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
-        return null;
+        return evamTripLocationHistoryService.updateTripLocationHistory(evamTripLocationHistoryRequestDTO);
+//        return null;
     }
 
     @PostMapping(value = "/methanereport", produces = "application/json")

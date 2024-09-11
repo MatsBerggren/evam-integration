@@ -2,6 +2,7 @@ package com.dedalus.amphi_integration.service.impl;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,13 @@ import com.dedalus.amphi_integration.model.amphi.State;
 import com.dedalus.amphi_integration.model.amphi.StateConfiguration;
 import com.dedalus.amphi_integration.model.amphi.StateEntry;
 import com.dedalus.amphi_integration.model.amphi.ToPosition;
+import com.dedalus.amphi_integration.model.amphi.Ward;
+import com.dedalus.amphi_integration.model.evam.HospitalLocation;
 import com.dedalus.amphi_integration.model.evam.Operation;
 import com.dedalus.amphi_integration.model.evam.OperationState;
 import com.dedalus.amphi_integration.model.evam.VehicleStatus;
+import com.dedalus.amphi_integration.repository.AmphiAssignmentRepository;
+import com.dedalus.amphi_integration.repository.AmphiDestinationRepository;
 import com.dedalus.amphi_integration.service.AmphiAssignmentService;
 import com.dedalus.amphi_integration.service.AmphiStateEntryService;
 import com.dedalus.amphi_integration.service.EvamOperationService;
@@ -43,7 +48,10 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
     AmphiStateEntryService amphiStateEntryService;
     @Autowired
     EvamVehicleStatusService evamVehicleStatusService;
-
+    @Autowired
+    AmphiAssignmentRepository amphiAssignmentRepository;
+    @Autowired
+    AmphiDestinationRepository amphiDestinationRepository;
 
     @Override
     public Assignment[] getAllAssignments() {
@@ -62,11 +70,11 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
             .created(DateFix.dateFixShort(operation.getCreatedTime()))
             .received(DateFix.dateFixShort(operation.getSendTime()))
             .accepted(DateFix.dateFixShort(operation.getAcceptedTime()))
-            .rowid(operation.amPHIUniqueId)
+            .rowid(operation.getAmPHIUniqueId())
             .is_closed(Boolean.toString(operation.operationState == OperationState.AVAILABLE))
             .is_selected(operation.operationState == OperationState.ACTIVE ? "1" : "0")
             .is_destination_alarm_sent("false")
-            .selected_destination(operation.getSelectedHospital().toString())
+            .selected_destination(getSelectedHospital(operation))
             .eta("2023-10-25T14:33:00Z")
             .is_head_unit("false")
             .is_routed("false")
@@ -83,9 +91,37 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
             .state_configuration(getStateConfiguration(operation)).build();
 
         assignments[0] = assignment;
+        deleteOldRecords();
+        amphiAssignmentRepository.save(assignment);
 
         return assignments;
 
+    }
+
+    private String getSelectedHospital(Operation operation) {
+        HospitalLocation selectedHospitalLocation = getSelectedHospitalLocation(operation);
+        if (selectedHospitalLocation == null) {
+            return "";
+        }
+    
+        return findMatchingWardId(selectedHospitalLocation);
+    }
+    
+    private HospitalLocation getSelectedHospitalLocation(Operation operation) {
+        return Arrays.stream(operation.getAvailableHospitalLocations())
+            .filter(location -> location.getId().toString().equals(operation.getSelectedHospital().toString()))
+            .findFirst()
+            .orElse(null);
+    }
+    
+    private String findMatchingWardId(HospitalLocation selectedHospitalLocation) {
+        return amphiDestinationRepository.findAll().stream()
+            .flatMap(destination -> Arrays.stream(destination.getWards()))
+            .filter(ward -> ward.getPosition().getWgs84_dd_la().equals(selectedHospitalLocation.getLatitude()) 
+                && ward.getPosition().getWgs84_dd_lo().equals(selectedHospitalLocation.getLongitude()))
+            .map(Ward::getId)
+            .findFirst()
+            .orElse("");
     }
 
     private StateConfiguration[] getStateConfiguration(Operation operation) {
@@ -139,7 +175,9 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm");
         ArrayList<Property> properties = new ArrayList<Property>();
 
-        String[] s = operation.getPatientName().split(" ");
+        String[] nameParts = operation.getPatientName().split(" ");
+        String firstName = nameParts.length > 0 ? nameParts[0] : "";
+        String lastName = nameParts.length > 1 ? String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length)) : "";
 
         properties.add(Property.builder().name("created").value(Objects.toString(operation.getCreatedTime().format(dateTimeFormatter), "")).build());
         properties.add(Property.builder().name("sender").value(Objects.toString(operation.getTransmitterCode(), "")).build());
@@ -150,10 +188,10 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
         properties.add(Property.builder().name("caseindex3").value(Objects.toString(operation.getHeader2(), "")).build());
         properties.add(Property.builder().name("city").value(Objects.toString(operation.getDestinationSiteLocation().getLocality(), "")).build());
         properties.add(Property.builder().name("comment").value(Objects.toString(operation.getCaseInfo(), "")).build());
-        properties.add(Property.builder().name("firstname").value(Objects.toString(s[0], "")).build());
+        properties.add(Property.builder().name("firstname").value(Objects.toString(firstName, "")).build());
         properties.add(Property.builder().name("ib").value(Objects.toString(operation.getOperationID(), "")).build());
         properties.add(Property.builder().name("id").value(Objects.toString(operation.getCaseFolderId(), "")).build());
-        properties.add(Property.builder().name("lastname").value(Objects.toString(s[1], "")).build());
+        properties.add(Property.builder().name("lastname").value(Objects.toString(lastName, "")).build());
         properties.add(Property.builder().name("municipality").value(Objects.toString(operation.getDestinationSiteLocation().getMunicipality(), "")).build());
         properties.add(Property.builder().name("personid").value(Objects.toString(operation.getPatientUID(), "")).build());
         properties.add(Property.builder().name("positionwgs84")
@@ -186,7 +224,12 @@ public class AmphiAssignmentServiceImpl implements AmphiAssignmentService {
 
         return properties;
     }
-    
+
+    public void deleteOldRecords() {
+        // LocalDate today = LocalDate.now();
+        amphiAssignmentRepository.deleteAll(); //.deleteByCreatedBefore(today);
+    }
+
     private State getState(VehicleStatus selectedVehicleStatus) {
         VehicleStatus vehicleStatus = evamVehicleStatusService.getByName(selectedVehicleStatus.getName());
 

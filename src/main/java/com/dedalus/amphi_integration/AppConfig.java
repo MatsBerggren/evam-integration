@@ -3,8 +3,10 @@ package com.dedalus.amphi_integration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @Configuration
+@EnableAspectJAutoProxy
 public class AppConfig {
 
     @Bean

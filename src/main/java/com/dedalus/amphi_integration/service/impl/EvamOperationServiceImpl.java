@@ -49,6 +49,7 @@ public class EvamOperationServiceImpl implements EvamOperationService {
         if (existingOperation.isEmpty() || !operation.getFullId().equals(existingOperation.get().getFullId())) {
             cleanDB();
             operation = saveNewOperation(operation);
+            return operation;
         }
 
         return updateExistingOperation(existingOperation.get(), operation);
